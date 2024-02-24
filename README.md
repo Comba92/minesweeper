@@ -1,5 +1,5 @@
 # Build
-This project depends on (raylib)[https://github.com/raysan5/raylib].
+This project depends on [raylib](https://github.com/raysan5/raylib).
 
 To build and run:
 ```bash
