@@ -283,6 +283,9 @@ int main() {
       drawGrid(grid);
       drawLines(grid);
 
+      DrawText("Left click:\ncheck boxes", 620, 200, 20, WHITE);
+      DrawText("Right click:\nset/unset flags", 620, 240, 20, WHITE);
+
       itoa(grid.mines, buff, 10);
       strcat(buff, " mines");
       DrawText(buff, 620, 460, 20, RED);
