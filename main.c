@@ -23,7 +23,7 @@ typedef struct {
   int width, height, mines;
 } Setup;
 static const Setup SETUPS[3] = {
-  (Setup) {.width = 8, .height = 8, .mines = 10},
+  (Setup) {.width = 12, .height = 12, .mines = 20},
   (Setup) {.width = 16, .height = 16, .mines = 40},
   (Setup) {.width = 30, .height = 16, .mines = 99},
 };
@@ -108,28 +108,28 @@ void computeCells(Grid grid) {
    }
 }
 
-void initRandom(Grid* grid) {
+void initRandom(Grid grid) {
   srand(time(NULL));
 
-  for (int y = 0; y < grid->height; y++) {
-    for (int x = 0; x < grid->width; x++) {
-      Cell* cell = getCell(*grid, x, y);
+  for (int y = 0; y < grid.height; y++) {
+    for (int x = 0; x < grid.width; x++) {
+      Cell* cell = getCell(grid, x, y);
       *cell = newCell(EMPTY);
     }
   }
 
-  for(int m=0; m < grid->mines; m++) {
+  for(int m=0; m < grid.mines; m++) {
     do {
-      int idx = rand() % (grid->width * grid->height + 1);
+      int idx = rand() % (grid.width * grid.height + 1);
 
-      if ( grid->cells[idx].type == EMPTY ) {
-        grid->cells[idx] = newCell(MINE);
+      if ( grid.cells[idx].type == EMPTY ) {
+        grid.cells[idx] = newCell(MINE);
         break;
       }
     } while(true);
   }
 
-  computeCells(*grid);
+  computeCells(grid);
 }
 
 void drawGrid(Grid grid) {
@@ -235,6 +235,15 @@ void flagCell(Grid grid, Vector2 mworld) {
   }
 }
 
+void showAllMines(Grid grid) {
+  for (int y = 0; y < grid.height; y++) {
+    for (int x = 0; x < grid.width; x++) {
+      Cell* cell = getCell(grid, x, y);
+      if (cell->type == MINE) cell->state == VISIBLE;
+    }
+  }
+}
+
 GameState checkWin(Grid grid) {
   int count = 0;
   char buff[16];
@@ -244,17 +253,22 @@ GameState checkWin(Grid grid) {
       Cell* cell = getCell(grid, x, y);
       if (!cell) continue;
 
-      if (cell->type == MINE && cell->state == VISIBLE) return LOST;
+      if (cell->type == MINE && cell->state == VISIBLE) {
+        showAllMines(grid);
+        return LOST;
+      }
 
       count += cell->type == EMPTY && cell->state == VISIBLE ? 1 : 0;
     }
   }
 
+  bool hasWon = count >= grid.width*grid.height - grid.mines;
+
   itoa(count, buff, 10);
   strcat(buff, " safe cells");
-  DrawText(buff, 620, 480, 20, GREEN);
+  DrawText(buff, 620, 480, 20, hasWon ? GREEN : WHITE);
 
-  return count >= grid.width * grid.height - grid.mines ? WON : RUNNING;
+  return hasWon ? WON : RUNNING;
 }
 
 void drawLines(Grid grid) {
@@ -272,7 +286,7 @@ int main() {
   SetTargetFPS(30);
 
   Grid grid = newGrid(SETUPS[MEDIUM]);
-  initRandom(&grid);
+  initRandom(grid);
 
   int hasWon = RUNNING;
   char buff[16];
@@ -291,12 +305,12 @@ int main() {
       DrawText(buff, 620, 460, 20, RED);
 
       hasWon = checkWin(grid);
-      DrawText(hasWon == WON ? "YOU WIN" : "", 620, 500, 20, GREEN);
+      DrawText(hasWon == WON ? "YOU WON" : "", 620, 500, 20, GREEN);
       DrawText(hasWon == LOST ? "YOU LOST" : "", 620, 520, 20, RED);
 
       if (IsKeyPressed(KEY_R)) {
         hasWon = RUNNING;
-        initRandom(&grid);
+        initRandom(grid);
       }
 
       if (hasWon != RUNNING) {
