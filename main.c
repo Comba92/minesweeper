@@ -239,7 +239,7 @@ void showAllMines(Grid grid) {
   for (int y = 0; y < grid.height; y++) {
     for (int x = 0; x < grid.width; x++) {
       Cell* cell = getCell(grid, x, y);
-      if (cell->type == MINE) cell->state == VISIBLE;
+      if (cell->type == MINE) cell->state = VISIBLE;
     }
   }
 }
